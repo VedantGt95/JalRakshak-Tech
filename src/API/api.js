@@ -9,3 +9,9 @@ export const loginUser = (user) => axios.post(`${BASE_URL}/auth/user/login`, use
 export const loginAdmin = (admin) => axios.post(`${BASE_URL}/auth/admin/login`,admin);
 
 export const setMarker = (marker) => axios.post(`${BASE_URL}/location/setMarker`,marker);
+
+export const getMarkers = () => axios.get(`${BASE_URL}/location/getMarkers`);
+
+export const verifyMarker = (id) => axios.put(`${BASE_URL}/location/verify/${id}`);
+
+export const deleteMarker = (id) => axios.delete(`${BASE_URL}/location/delete/${id}`);

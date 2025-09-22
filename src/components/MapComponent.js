@@ -1,36 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 
-function MapComponent({ role }) {
+import { getMarkers, setMarker, verifyMarker, deleteMarker } from '../API/api';
+
+
+
+
+
+function MapComponent({ role, userId, username }) {
   const [markers, setMarkers] = useState([]);
 
+  
   useEffect(() => {
-    
-    setMarkers([
-      { id: 1, lat: 19.076, lng: 72.8777, user: 'UserA' },
-      { id: 2, lat: 18.5204, lng: 73.8567, user: 'UserB' },
-    ]);
+    fetchMarkers();
   }, []);
+
+  const fetchMarkers = async () => {
+    try {
+      const res = await getMarkers();
+      setMarkers(res.data);
+    } catch (err) {
+      console.error("Error fetching markers", err);
+    }
+  };
 
   function MapClickHandler() {
     useMapEvents({
-      click(e) {
+      click: async (e) => {
         if (role === 'USER') {
           const newMarker = {
-            id: Date.now(),
-            lat: e.latlng.lat,
-            lng: e.latlng.lng,
-            user: 'CurrentUser',
+            latitude: e.latlng.lat,
+            longitude: e.latlng.lng,
+            status: 'PENDING',
+            createdBy: userId
           };
-          setMarkers((prev) => [...prev, newMarker]);
+          try {
+            const res = await setMarker(newMarker);
+            setMarkers((prev) => [...prev, res.data]);
+          } catch (err) {
+            console.error("Error setting marker", err);
+          }
         }
       },
     });
     return null;
   }
 
-  const handleDelete = (id) => {
-    setMarkers((prev) => prev.filter((m) => m.id !== id));
+  const handleVerify = async (id) => {
+    try {
+      await verifyMarker(id);
+      setMarkers((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, status: 'VERIFIED' } : m))
+      );
+    } catch (err) {
+      console.error("Error verifying marker", err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteMarker(id);
+      setMarkers((prev) => prev.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Error deleting marker", err);
+    }
   };
 
   return (
@@ -38,14 +71,16 @@ function MapComponent({ role }) {
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapClickHandler />
       {markers.map((m) => (
-        <Marker key={m.id} position={[m.lat, m.lng]}>
+        <Marker key={m.id} position={[m.latitude, m.longitude]}>
           <Popup>
-            Reported by: {m.user} <br />
-            Lat: {m.lat.toFixed(4)}, Lng: {m.lng.toFixed(4)}
+            Reported by: {m.createdBy === userId ? username : `User ${m.createdBy}`} <br />
+            Lat: {m.latitude.toFixed(4)}, Lng: {m.longitude.toFixed(4)} <br />
+            Status: {m.status === 'PENDING' ? '⏳ Pending' : '✅ Verified'}
             {role === 'ADMIN' && (
               <>
+                {m.status === 'PENDING' && <><br /><button onClick={() => handleVerify(m.id)}>✔ Verify</button></>}
                 <br />
-                <button onClick={() => handleDelete(m.id)}>Remove</button>
+                <button onClick={() => handleDelete(m.id)}>❌ Remove</button>
               </>
             )}
           </Popup>
