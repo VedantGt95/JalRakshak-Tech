@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom"; 
 import { loginUser, registerUser } from "../API/api";
 
 function Login() {
   const [showRegister, setShowRegister] = useState(false);
+  const navigate = useNavigate(); 
 
   // ---- LOGIN FORM ----
-  const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors } , 
-    reset: resetLogin  } = useForm();
+  const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors }, reset: resetLogin } = useForm();
 
   const onLogin = async (data) => {
     try {
@@ -15,7 +16,7 @@ function Login() {
       resetLogin();
       if (res.data) {
         alert(`Welcome ${res.data.username}!`);
-        // Redirect to dashboard here
+        navigate("/map");
       } else {
         alert("User not found. Please register.");
         setShowRegister(true);
@@ -31,13 +32,13 @@ function Login() {
   const { register: regRegister, handleSubmit: handleRegSubmit, formState: { errors: regErrors }, reset: resetReg } = useForm();
 
   const onRegister = async (data) => {
-   
     try {
       const res = await registerUser(data);
-       resetReg();
+      resetReg();
       if (res.data) {
         alert("User registered successfully! Please login.");
         setShowRegister(false);
+        navigate("/login"); // ✅ go back to login
       } else {
         alert("Registration failed");
       }
