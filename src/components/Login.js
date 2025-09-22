@@ -1,18 +1,41 @@
-
-
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import {registerUser} from "../API/api";
+import { loginUser, registerUser } from "../API/api";
 
 function Login() {
-   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [showRegister, setShowRegister] = useState(false);
 
-  const onSubmit = async (data) => {
+  // ---- LOGIN FORM ----
+  const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors } } = useForm();
+
+  const onLogin = async (data) => {
+    try {
+      const res = await loginUser(data);
+      if (res.data) {
+        alert(`Welcome ${res.data.username}!`);
+        // Redirect to dashboard here
+      } else {
+        alert("User not found. Please register.");
+        setShowRegister(true);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error logging in");
+      setShowRegister(true);
+    }
+  };
+
+  // ---- REGISTRATION FORM ----
+  const { register: regRegister, handleSubmit: handleRegSubmit, formState: { errors: regErrors } } = useForm();
+
+  const onRegister = async (data) => {
     try {
       const res = await registerUser(data);
       if (res.data) {
-        alert("User registered successfully!");
+        alert("User registered successfully! Please login.");
+        setShowRegister(false);
       } else {
-        alert("Registration failed.");
+        alert("Registration failed");
       }
     } catch (error) {
       console.error(error);
@@ -22,30 +45,66 @@ function Login() {
 
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            {...register("username", { required: "Username is required" })}
-          />
-          {errors.username && <p>{errors.username.message}</p>}
-        </div>
-
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            {...register("password", { required: "Password is required" })}
-          />
-          {errors.password && <p>{errors.password.message}</p>}
-        </div>
-
-        
-
-        <button type="submit" style={{ marginTop: "10px" }}>Register</button>
-      </form>
+      {!showRegister ? (
+        <form onSubmit={handleLoginSubmit(onLogin)}>
+          <h2>Login</h2>
+          <div>
+            <label>Username</label>
+            <input
+              type="text"
+              {...loginRegister("username", { required: "Username is required" })}
+            />
+            {loginErrors.username && <p>{loginErrors.username.message}</p>}
+          </div>
+          <div>
+            <label>Password</label>
+            <input
+              type="password"
+              {...loginRegister("password", { required: "Password is required" })}
+            />
+            {loginErrors.password && <p>{loginErrors.password.message}</p>}
+          </div>
+          <button type="submit" style={{ marginTop: "10px" }}>Login</button>
+          <p style={{ marginTop: "10px" }}>
+            Don't have an account? <span style={{ color: "blue", cursor: "pointer" }} onClick={() => setShowRegister(true)}>Register</span>
+          </p>
+        </form>
+      ) : (
+        <form onSubmit={handleRegSubmit(onRegister)}>
+          <h2>Register</h2>
+          <div>
+            <label>Username</label>
+            <input
+              type="text"
+              {...regRegister("username", { required: "Username is required" })}
+            />
+            {regErrors.username && <p>{regErrors.username.message}</p>}
+          </div>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              {...regRegister("email", {
+                required: "Email is required",
+                pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email address" },
+              })}
+            />
+            {regErrors.email && <p>{regErrors.email.message}</p>}
+          </div>
+          <div>
+            <label>Password</label>
+            <input
+              type="password"
+              {...regRegister("password", { required: "Password is required" })}
+            />
+            {regErrors.password && <p>{regErrors.password.message}</p>}
+          </div>
+          <button type="submit" style={{ marginTop: "10px" }}>Register</button>
+          <p style={{ marginTop: "10px" }}>
+            Already have an account? <span style={{ color: "blue", cursor: "pointer" }} onClick={() => setShowRegister(false)}>Login</span>
+          </p>
+        </form>
+      )}
     </div>
   );
 }
