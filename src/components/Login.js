@@ -38,7 +38,7 @@ function Login() {
       if (res.data) {
         alert("User registered successfully! Please login.");
         setShowRegister(false);
-        navigate("/login"); // ✅ go back to login
+        navigate("/login"); 
       } else {
         alert("Registration failed");
       }
