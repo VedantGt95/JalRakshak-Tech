@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
+import {registerUser} from "../API/api";
 
 function Login() {
   const [role, setRole] = useState(null);
