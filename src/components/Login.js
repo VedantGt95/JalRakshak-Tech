@@ -6,11 +6,13 @@ function Login() {
   const [showRegister, setShowRegister] = useState(false);
 
   // ---- LOGIN FORM ----
-  const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors } } = useForm();
+  const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors } , 
+    reset: resetLogin  } = useForm();
 
   const onLogin = async (data) => {
     try {
       const res = await loginUser(data);
+      resetLogin();
       if (res.data) {
         alert(`Welcome ${res.data.username}!`);
         // Redirect to dashboard here
@@ -26,11 +28,13 @@ function Login() {
   };
 
   // ---- REGISTRATION FORM ----
-  const { register: regRegister, handleSubmit: handleRegSubmit, formState: { errors: regErrors } } = useForm();
+  const { register: regRegister, handleSubmit: handleRegSubmit, formState: { errors: regErrors }, reset: resetReg } = useForm();
 
   const onRegister = async (data) => {
+   
     try {
       const res = await registerUser(data);
+       resetReg();
       if (res.data) {
         alert("User registered successfully! Please login.");
         setShowRegister(false);
