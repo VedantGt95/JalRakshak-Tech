@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { getMarkers, setMarker, verifyMarker, deleteMarker } from '../API/api';
+import L from "leaflet";
+import markerIcon from "./location3.png";
+
+
+const customIcon = new L.Icon({
+  iconUrl: markerIcon,
+  iconSize: [35, 35], // size of the icon
+  popupAnchor: [0, -35], // point from which the popup should open relative to the icon
+});
 
 function MapComponent({ role, userId, username }) {
   const [markers, setMarkers] = useState([]);
@@ -12,7 +21,7 @@ function MapComponent({ role, userId, username }) {
   const fetchMarkers = async () => {
     try {
       const res = await getMarkers();
-      // Ensure markers is always an array
+    
       setMarkers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching markers", err);
@@ -67,7 +76,7 @@ function MapComponent({ role, userId, username }) {
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapClickHandler />
       {Array.isArray(markers) && markers.map((m) => (
-        <Marker key={m.id} position={[m.latitude, m.longitude]}>
+        <Marker key={m.id} position={[m.latitude, m.longitude]}  icon={customIcon}>
           <Popup>
             Reported by: {m.createdBy?.id === userId ? username : `User ${m.createdBy?.id}`} <br />
             Lat: {m.latitude.toFixed(4)}, Lng: {m.longitude.toFixed(4)} <br />
