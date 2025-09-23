@@ -16,6 +16,8 @@ function Login() {
       resetLogin();
       if (res.data) {
         alert(`Welcome ${res.data.username}!`);
+         localStorage.setItem("user", JSON.stringify(res.data));
+
         navigate("/map");
       } else {
         alert("User not found. Please register.");
