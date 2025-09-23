@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-
 import { getMarkers, setMarker, verifyMarker, deleteMarker } from '../API/api';
-
-
-
-
 
 function MapComponent({ role, userId, username }) {
   const [markers, setMarkers] = useState([]);
 
-  
   useEffect(() => {
     fetchMarkers();
   }, []);
@@ -18,9 +12,11 @@ function MapComponent({ role, userId, username }) {
   const fetchMarkers = async () => {
     try {
       const res = await getMarkers();
-      setMarkers(res.data);
+      // Ensure markers is always an array
+      setMarkers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching markers", err);
+      setMarkers([]);
     }
   };
 
@@ -70,10 +66,10 @@ function MapComponent({ role, userId, username }) {
     <MapContainer center={[19.076, 72.8777]} zoom={8} style={{ height: '500px', width: '100%' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapClickHandler />
-      {markers.map((m) => (
+      {Array.isArray(markers) && markers.map((m) => (
         <Marker key={m.id} position={[m.latitude, m.longitude]}>
           <Popup>
-            Reported by: {m.createdBy === userId ? username : `User ${m.createdBy}`} <br />
+            Reported by: {m.createdBy?.id === userId ? username : `User ${m.createdBy?.id}`} <br />
             Lat: {m.latitude.toFixed(4)}, Lng: {m.longitude.toFixed(4)} <br />
             Status: {m.status === 'PENDING' ? '⏳ Pending' : '✅ Verified'}
             {role === 'ADMIN' && (
