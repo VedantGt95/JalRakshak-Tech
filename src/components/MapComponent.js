@@ -7,7 +7,7 @@ function MapComponent({ role, userId, username }) {
 
   useEffect(() => {
     fetchMarkers();
-  }, []);
+  }, [markers]);
 
   const fetchMarkers = async () => {
     try {
