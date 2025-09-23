@@ -2,21 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { getMarkers, setMarker, verifyMarker, deleteMarker } from '../API/api';
 import L from "leaflet";
-import markerIcon from "./location3.png";
 
-
-const customIcon = new L.Icon({
-  iconUrl: markerIcon,
-  iconSize: [35, 35], // size of the icon
-  popupAnchor: [0, -35], // point from which the popup should open relative to the icon
+const pendingIcon = L.icon({
+  iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+  iconSize: [40, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  shadowSize: [41, 41],
 });
 
+const verifiedIcon = L.icon({
+  iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+  iconSize: [40, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  shadowSize: [41, 41],
+});
+
+ 
 function MapComponent({ role, userId, username }) {
   const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
     fetchMarkers();
-  }, [markers]);
+  }, []);
 
   const fetchMarkers = async () => {
     try {
@@ -72,20 +83,20 @@ function MapComponent({ role, userId, username }) {
   };
 
   return (
-    <MapContainer center={[19.076, 72.8777]} zoom={8} style={{ height: '500px', width: '100%' }}>
+    <MapContainer center={[19.076, 72.8777]} zoom={8} style={{ height: '620px', width: '100%' }} >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <MapClickHandler />
       {Array.isArray(markers) && markers.map((m) => (
-        <Marker key={m.id} position={[m.latitude, m.longitude]}  icon={customIcon}>
+        <Marker key={m.id} position={[m.latitude, m.longitude]} icon={m.status === 'PENDING' ? pendingIcon : verifiedIcon}>
           <Popup>
             Reported by: {m.createdBy?.id === userId ? username : `User ${m.createdBy?.id}`} <br />
             Lat: {m.latitude.toFixed(4)}, Lng: {m.longitude.toFixed(4)} <br />
             Status: {m.status === 'PENDING' ? '⏳ Pending' : '✅ Verified'}
             {role === 'ADMIN' && (
               <>
-                {m.status === 'PENDING' && <><br /><button onClick={() => handleVerify(m.id)}>✔ Verify</button></>}
+                {m.status === 'PENDING' && <><br /><button className='border p-1'onClick={() => handleVerify(m.id)}>✔ Verify</button></>}
                 <br />
-                <button onClick={() => handleDelete(m.id)}>❌ Remove</button>
+                <button className='border p-1 ' onClick={() => handleDelete(m.id)}>❌ Remove</button>
               </>
             )}
           </Popup>

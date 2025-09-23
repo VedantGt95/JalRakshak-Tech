@@ -11,14 +11,17 @@ function AdminLogin() {
   const ADMIN_PASSWORD = "1234";
 
   const onLogin = (data) => {
-    reset();
-    if (data.username === ADMIN_USERNAME && data.password === ADMIN_PASSWORD) {
-      alert(`Welcome Admin ${data.username}!`);
-      navigate("/admin/dashboard");
-    } else {
-      alert("Invalid credentials. Try again.");
-    }
-  };
+  reset();
+  if (data.username === ADMIN_USERNAME && data.password === ADMIN_PASSWORD) {
+    
+    sessionStorage.setItem("isAdmin", "true");
+
+    alert(`Welcome Admin ${data.username}!`);
+    navigate("/admin/dashboard");
+  } else {
+    alert("Invalid credentials. Try again.");
+  }
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
