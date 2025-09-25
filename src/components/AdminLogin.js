@@ -1,25 +1,36 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { loginAdmin } from "../API/api";
 
 function AdminLogin() {
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-  const ADMIN_USERNAME = "Telusko";
-  const ADMIN_PASSWORD = "1234";
 
-  const onLogin = (data) => {
-  reset();
-  if (data.username === ADMIN_USERNAME && data.password === ADMIN_PASSWORD) {
+const onLogin = async (data) => {
+  try {
     
-    sessionStorage.setItem("isAdmin", "true");
+    const response = await loginAdmin({
+      username: data.username,
+      password: data.password,
+    });
 
-    alert(`Welcome Admin ${data.username}!`);
-    navigate("/admin/dashboard");
-  } else {
-    alert("Invalid credentials. Try again.");
+    if (response.status === 200) {
+      
+      sessionStorage.setItem("isAdmin", "true");
+      sessionStorage.setItem("adminUser", JSON.stringify(response.data));
+
+      alert(`Welcome Admin ${data.username}!`);
+      reset();
+      navigate("/admin/dashboard");
+    } else {
+      alert("Invalid credentials. Try again.");
+    }
+  } catch (error) {
+    console.error("Admin login error:", error);
+    alert("Login failed. Please check your credentials.");
   }
 };
 
